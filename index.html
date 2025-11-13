@@ -74,6 +74,15 @@
             margin: 0;
             transition: background-color 0.3s ease, color 0.3s ease;
             overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        body.light-theme {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+        }
+        
+        body.dark-theme {
+            background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
         }
 
         .pt-header-offset { padding-top: 5rem; }
@@ -105,8 +114,17 @@
             header #main-name { font-size: 2.5rem; }
         }
 
-        header { transition: box-shadow 0.3s ease; }
-        header.header-scrolled { box-shadow: var(--current-header-shadow); }
+        header { 
+            transition: box-shadow 0.3s ease, backdrop-filter 0.3s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            will-change: box-shadow, backdrop-filter;
+        }
+        header.header-scrolled { 
+            box-shadow: var(--current-header-shadow);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
 
         .header-button-base {
             font-family: 'Roboto', sans-serif; padding: 0.5rem 1rem; font-size: 0.85rem;
@@ -156,9 +174,27 @@
             flex-shrink: 0; display: flex; align-items: center; justify-content: center;
             border-radius: 0.75rem; overflow: hidden;
             aspect-ratio: 1 / 1; width: 100%; height: auto;
-            transition: border-radius 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            will-change: transform, border-radius;
         }
-        .image-wrapper:hover { border-radius: 50%; }
+        .image-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .image-wrapper:hover { 
+            border-radius: 50%; 
+            transform: scale(1.05);
+        }
+        .image-wrapper:hover::after {
+            opacity: 1;
+        }
         #profile-row .image-wrapper { background-color: var(--current-icon-wrapper-bg); }
         #gadgets-row .image-wrapper { background-color: var(--gadget-icon-bg); }
         #discord-row .image-wrapper { background-color: var(--discord-icon-bg); }
@@ -176,13 +212,16 @@
         .image-wrapper svg.discord-icon { fill: var(--current-discord-svg-fill); }
         .image-wrapper:hover svg { transform: scale(1.1); }
 
-        .image-wrapper .material-symbols-outlined {
-            font-size: 10rem; color: #000000; /* ダークモードでも黒固定 */
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), color 0.3s ease;
-            line-height: 1;
-            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+        .image-wrapper svg[data-lucide] {
+            width: 100%;
+            height: 100%;
+            padding: 15%;
+            box-sizing: border-box;
+            stroke: #000000; /* ダークモードでも黒固定 */
+            fill: none;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), stroke 0.3s ease;
         }
-        .image-wrapper:hover .material-symbols-outlined { transform: scale(1.1); }
+        .image-wrapper:hover svg[data-lucide] { transform: scale(1.1); }
 
         @media (min-width: 768px) {
             #profile-row .content-card { order: 1; } #profile-row .image-wrapper { order: 2; }
@@ -262,17 +301,47 @@
             width: 28px; height: 28px; background-color: white; border: none; border-radius: 50%;
             position: fixed; pointer-events: none; left: 0; top: 0;
             transform: translate(-50%, -50%); z-index: 9999; mix-blend-mode: difference;
-            transition: width 0.1s ease, height 0.1s ease, transform 0.1s ease, opacity 0.1s ease;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        height 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.1s ease;
+            will-change: width, height, transform, border-radius;
         }
-        .custom-cursor.hovered { width: 36px; height: 36px; transform: translate(-50%, -50%) scale(1.2); }
-        .custom-cursor.clicked { width: 32px; height: 32px; transform: translate(-50%, -50%) scale(0.8); }
+        .custom-cursor.hovered { 
+            width: 36px; 
+            height: 36px; 
+            transform: translate(-50%, -50%) scale(1.2); 
+        }
+        .custom-cursor.clicked { 
+            width: 32px; 
+            height: 32px; 
+            transform: translate(-50%, -50%) scale(0.8); 
+        }
+        .custom-cursor.merged {
+            border-radius: 9999px;
+            mix-blend-mode: normal;
+            background-color: var(--current-button-text-color);
+            opacity: 0.15;
+            z-index: -1;
+        }
         @media (max-width: 767px) {
             .custom-cursor { display: none !important; }
             body { cursor: auto !important; }
         }
 
-        .animate-on-scroll { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-        .animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+        .animate-on-scroll { 
+            opacity: 0; 
+            transform: translateY(30px) scale(0.98); 
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                        transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
+            will-change: opacity, transform;
+        }
+        .animate-on-scroll.visible { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+            will-change: auto;
+        }
 
         .music-player iframe { display: block; width: 100%; border-radius: 12px; }
     </style>
@@ -295,6 +364,7 @@
                     <div id="language-menu" class="language-menu focus:outline-none">
                         <a href="#" id="lang-menu-ja" class="language-menu-item block px-4 py-2 sm:py-2.5 text-xs sm:text-sm" data-lang="ja"></a>
                         <a href="#" id="lang-menu-en" class="language-menu-item block px-4 py-2 sm:py-2.5 text-xs sm:text-sm" data-lang="en"></a>
+                        <a href="#" id="lang-menu-zh" class="language-menu-item block px-4 py-2 sm:py-2.5 text-xs sm:text-sm" data-lang="zh"></a>
                     </div>
                 </div>
                 <button id="theme-toggle" aria-label="Toggle theme" class="header-button-base focus:outline-none focus:ring-2">
@@ -319,9 +389,7 @@
 
             <div id="gadgets-row" class="card-image-row image-left animate-on-scroll">
                 <div class="image-wrapper hidden md:flex">
-                    <span class="material-symbols-outlined" aria-label="Smartphone icon">
-                        smartphone
-                    </span>
+                    <svg data-lucide="smartphone" class="w-full h-full p-[15%] box-border" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
                 </div>
                 <section id="gadgets-section" class="content-card">
                     <h2 id="gadgets-heading" class="card-title-text"></h2>
@@ -334,13 +402,12 @@
                 <section id="discord-section" class="content-card"> <h2 id="join-discord-heading" class="card-title-text"></h2>
                     <p id="join-discord-description" class="leading-relaxed mb-4 sm:mb-5 text-left text-sm sm:text-base" style="color: var(--current-text-variant);"></p>
                     <div class="text-left">
-                        <a href="https://discord.gg/JxDp24z" target="_blank" rel="noopener noreferrer" id="join-discord-button" class="discord-join-button outline-button"></a>
+                        <a href="https://discord.gg/byNUwPjqxB" target="_blank" rel="noopener noreferrer" id="join-discord-button" class="discord-join-button outline-button"></a>
                     </div>
                 </section>
                  <div class="image-wrapper hidden md:flex">
-                    <svg class="discord-icon" viewBox="0 0 245 240" xmlns="http://www.w3.org/2000/svg" aria-label="Discord icon">
-                      <path d="M104.4 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1.1-6.1-4.5-11.1-10.2-11.1zM140.9 103.9c-5.7 0-10.2 5-10.2 11.1s4.6 11.1 10.2 11.1c5.7 0 10.2-5 10.2-11.1s-4.5-11.1-10.2-11.1z"/>
-                      <path d="M189.5 20h-134C44.2 20 35 29.2 35 40.6v135.2c0 11.4 9.2 20.6 20.5 20.6h113.4l-5.3-18.5 12.8 11.9 12.1 11.2 21.5 19V40.6c0-11.4-9.2-20.6-20.5-20.6zm-38.6 130.6s-3.6-4.3-6.6-8.1c13.1-3.7 18.1-11.9 18.1-11.9-4.1 2.7-8 4.6-11.5 5.9-5 2.1-9.8 3.5-14.5 4.3-9.6 1.8-18.4 1.3-25.9-.1-5.7-1.1-10.6-2.7-14.7-4.3-2.3-.9-4.8-2-7.3-3.4-.3-.2-.6-.3-.9-.5-.2-.1-.3-.2-.4-.3-1.8-1-2.8-1.7-2.8-1.7s4.8 8 17.5 11.8c-3 3.8-6.7 8.3-6.7 8.3-22.1-.7-30.5-15.2-30.5-15.2 0-32.2 14.4-58.3 14.4-58.3 14.4-10.8 28.7-10.8 28.7-10.8l1 1.2c-18 5.2-26.3 13.1-26.3 13.1s2.2-1.2 5.9-2.9c10.7-4.7 19.2-6 22.7-6.3.6-.1 1.1-.2 1.7-.2 6.1-.8 13-1 20.2-.2 9.5 1.1 19.7 3.9 30.1 9.6 0 0-7.9-7.5-24.9-12.7l1.4-1.6s14.3 0 28.7 10.8c0 0 14.4 26.1 14.4 58.3 0 0-8.5 14.5-30.6 15.2z"/>
+                    <svg class="discord-icon" viewBox="0 -28.5 256 256" xmlns="http://www.w3.org/2000/svg" aria-label="Discord icon" preserveAspectRatio="xMidYMid">
+                      <path d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z" fill-rule="nonzero"/>
                     </svg>
                 </div>
             </div>
@@ -350,10 +417,13 @@
                     <h2 id="sns-heading" class="card-title-text"></h2>
                     <div class="social-icons-container">
                         <a href="https://twitter.com/nemy_new" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" class="sns-icon-link outline-button">
-                            <svg data-lucide="twitter" class="w-5 h-5 sm:w-auto sm:h-auto"></svg>
+                            <svg data-lucide="x" class="w-5 h-5 sm:w-auto sm:h-auto"></svg>
                         </a>
                          <a href="https://www.instagram.com/nemy_inst/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="sns-icon-link outline-button">
                             <svg data-lucide="instagram" class="w-5 h-5 sm:w-auto sm:h-auto"></svg>
+                        </a>
+                        <a href="https://github.com/nemy-new" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="sns-icon-link outline-button">
+                            <svg data-lucide="github" class="w-5 h-5 sm:w-auto sm:h-auto"></svg>
                         </a>
                     </div>
                 </section>
@@ -376,7 +446,7 @@
             </div>
 
             <section id="music-player-section" class="content-card animate-on-scroll music-player">
-                <h2 id="music-player-heading" class="card-title-text">Songs I've Listened to Recently</h2>
+                <h2 id="music-player-heading" class="card-title-text"></h2>
                 <div class="mt-4">
                     <iframe id="spotify-player" style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0qOMyw2T7DpPIS0Xe7fDxY?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 </div>
@@ -389,12 +459,20 @@
         </footer>
     </div>
 
-    <script>
-        // Theme toggle icons SVG paths
-        document.getElementById('sun-icon').innerHTML = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>`;
-        document.getElementById('moon-icon').innerHTML = `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>`;
-    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Theme toggle icons SVG paths - using Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            if (sunIcon) {
+                sunIcon.innerHTML = `<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>`;
+            }
+            if (moonIcon) {
+                moonIcon.innerHTML = `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>`;
+            }
+        });
+    </script>
     <script>
         let customCursor;
 
@@ -405,6 +483,7 @@
         const languageButtonText = document.getElementById('language-button-text');
         const langMenuJa = document.getElementById('lang-menu-ja');
         const langMenuEn = document.getElementById('lang-menu-en');
+        const langMenuZh = document.getElementById('lang-menu-zh');
         const mainName = document.getElementById('main-name');
         const profileHeading = document.getElementById('profile-heading');
         const profileText = document.getElementById('profile-text');
@@ -423,27 +502,48 @@
         const emailTextSpan = document.getElementById('email-text');
         const pageHeader = document.getElementById('page-header');
         const spotifyPlayer = document.getElementById('spotify-player');
+        const musicPlayerHeading = document.getElementById('music-player-heading');
 
 
         const fixedTitles = {
-            profileTitle: "Profile",
-            gadgetsTitle: "Gadgets I Own",
-            joinDiscordTitle: "Join Our Discord",
-            snsTitle: "Social",
-            contactTitle: "Contacts"
+            ja: {
+                profileTitle: "プロフィール",
+                gadgetsTitle: "所有ガジェット",
+                joinDiscordTitle: "Discordに参加",
+                snsTitle: "SNS",
+                contactTitle: "連絡先",
+                musicPlayerTitle: "最近聴いた曲"
+            },
+            en: {
+                profileTitle: "Profile",
+                gadgetsTitle: "Gadgets I Own",
+                joinDiscordTitle: "Join Our Discord",
+                snsTitle: "Social",
+                contactTitle: "Contacts",
+                musicPlayerTitle: "Songs I've Listened to Recently"
+            },
+            zh: {
+                profileTitle: "个人资料",
+                gadgetsTitle: "我拥有的设备",
+                joinDiscordTitle: "加入我们的Discord",
+                snsTitle: "社交媒体",
+                contactTitle: "联系方式",
+                musicPlayerTitle: "最近听的歌曲"
+            }
         };
 
         const siteOwnerName = "Nemy";
 
         const content = {
             ja: {
-                profileContent: "こんにちは、私はGoogleが大好きな埼玉在住の学生、ねみぃです！GoogleのサービスやAndroidプラットフォームの奥深さ、そしてその複雑な魅力に惹かれ、X（Twitter）で技術的な側面やエコシステムに関する洞察を共有しています。単なる機能紹介に留まらず、その背後にある思想や将来の展望にも踏み込み、少し専門的な視点から情報を提供することを目指しています。ソーシャルメディアを通じて、皆さんがGoogleやAndroidの世界をより深く探求し、楽しむための一助となれば幸いです。",
+                profileContent: "こんにちは、私はGoogleが大好きな日本在住の学生、ねみぃです！GoogleのサービスやAndroidプラットフォームの奥深さ、そしてその複雑な魅力に惹かれ、X（Twitter）で技術的な側面やエコシステムに関する洞察を共有しています。単なる機能紹介に留まらず、その背後にある思想や将来の展望にも踏み込み、少し専門的な視点から情報を提供することを目指しています。ソーシャルメディアを通じて、皆さんがGoogleやAndroidの世界をより深く探求し、楽しむための一助となれば幸いです。",
                 profileImageAlt: "ねみぃのプロフィール画像",
                 myGadgets: [
                     { name: "Galaxy S25 Ultra", icon: "smartphone", id: "galaxy-s25-ultra" },
-                    { name: "Galaxy Buds3 Pro", icon: "headphones", id: "galaxy-buds3-pro" },
-                    { name: "Galaxy Book4 Edge", icon: "laptop-2", id: "galaxy-book4-edge" },
-                    { name: "Pixel Tablet", icon: "tablet", id: "pixel-tablet" }
+                    { name: "iPhone 15 Plus", icon: "smartphone", id: "iphone-15-plus" },
+                    { name: "MacBook Pro M4 Pro", icon: "laptop", id: "macbook-pro-m4-pro" },
+                    { name: "Pixel Tablet", icon: "tablet", id: "pixel-tablet" },
+                    { name: "WH-1000XM5", icon: "headphones", id: "wh-1000xm5" }
                 ],
                 contactEmailLabelText: "メール",
                 contactDmLabelText: "X (旧Twitter)",
@@ -452,16 +552,18 @@
                 languageButtonLabel: "言語",
                 langMenuItemJaText: "日本語",
                 langMenuItemEnText: "English",
+                langMenuItemZhText: "中文",
                 footer: "© 2025 Nemy<br>All rights reserved."
             },
             en: {
-                profileContent: "Hello, I'm Nemy, a student based in Saitama who absolutely loves Google! Fascinated by the depth and intricacies of Google's services and the Android platform, I share insights into their technical aspects and ecosystem on X (Twitter). I aim to go beyond simple feature introductions, delving into the underlying philosophies and future prospects, offering a somewhat more specialized perspective. Through social media, I hope to help you explore and enjoy the world of Google and Android more deeply.",
+                profileContent: "Hello, I'm Nemy, a student based in Japan who absolutely loves Google! Fascinated by the depth and intricacies of Google's services and the Android platform, I share insights into their technical aspects and ecosystem on X (Twitter). I aim to go beyond simple feature introductions, delving into the underlying philosophies and future prospects, offering a somewhat more specialized perspective. Through social media, I hope to help you explore and enjoy the world of Google and Android more deeply.",
                 profileImageAlt: "Nemy's profile image",
                 myGadgets: [
                     { name: "Galaxy S25 Ultra", icon: "smartphone", id: "galaxy-s25-ultra" },
-                    { name: "Galaxy Buds3 Pro", icon: "headphones", id: "galaxy-buds3-pro" },
-                    { name: "Galaxy Book4 Edge", icon: "laptop-2", id: "galaxy-book4-edge" },
-                    { name: "Pixel Tablet", icon: "tablet", id: "pixel-tablet" }
+                    { name: "iPhone 15 Plus", icon: "smartphone", id: "iphone-15-plus" },
+                    { name: "MacBook Pro M4 Pro", icon: "laptop", id: "macbook-pro-m4-pro" },
+                    { name: "Pixel Tablet", icon: "tablet", id: "pixel-tablet" },
+                    { name: "WH-1000XM5", icon: "headphones", id: "wh-1000xm5" }
                 ],
                 contactEmailLabelText: "Email",
                 contactDmLabelText: "X (formerly Twitter)",
@@ -470,11 +572,38 @@
                 languageButtonLabel: "Language",
                 langMenuItemJaText: "日本語",
                 langMenuItemEnText: "English",
+                langMenuItemZhText: "中文",
                 footer: "© 2025 Nemy<br>All rights reserved."
+            },
+            zh: {
+                profileContent: "你好，我是Nemy，一位居住在日本、非常热爱Google的学生！我被Google服务和Android平台的深度和复杂性所吸引，在X（Twitter）上分享关于它们的技术方面和生态系统的见解。我不仅限于简单的功能介绍，还深入探讨其背后的理念和未来前景，提供更专业的视角。通过社交媒体，我希望帮助您更深入地探索和享受Google和Android的世界。",
+                profileImageAlt: "Nemy的个人资料图片",
+                myGadgets: [
+                    { name: "Galaxy S25 Ultra", icon: "smartphone", id: "galaxy-s25-ultra" },
+                    { name: "iPhone 15 Plus", icon: "smartphone", id: "iphone-15-plus" },
+                    { name: "MacBook Pro M4 Pro", icon: "laptop", id: "macbook-pro-m4-pro" },
+                    { name: "Pixel Tablet", icon: "tablet", id: "pixel-tablet" },
+                    { name: "WH-1000XM5", icon: "headphones", id: "wh-1000xm5" }
+                ],
+                contactEmailLabelText: "电子邮件",
+                contactDmLabelText: "X（原Twitter）",
+                joinDiscordDescText: "这是一个讨论Google产品、Android和信息交流的社区。欢迎加入我们！",
+                joinDiscordButtonText: "加入Discord群组",
+                languageButtonLabel: "语言",
+                langMenuItemJaText: "日本語",
+                langMenuItemEnText: "English",
+                langMenuItemZhText: "中文",
+                footer: "© 2025 Nemy<br>保留所有权利。"
             }
         };
 
         let currentLang = localStorage.getItem('language') || 'ja';
+        // 有効な言語コードの検証
+        const validLangs = ['ja', 'en', 'zh'];
+        if (!validLangs.includes(currentLang)) {
+            currentLang = 'ja';
+            localStorage.setItem('language', currentLang);
+        }
         let isDarkMode = !(localStorage.getItem('theme') === 'light');
 
         function renderGadgetList() {
@@ -497,91 +626,92 @@
 
         function updateTextContent() {
             const c = content[currentLang];
-            if (mainName) mainName.textContent = siteOwnerName;
-
-            if (profileHeading) profileHeading.textContent = fixedTitles.profileTitle;
-            if (gadgetsHeading) gadgetsHeading.textContent = fixedTitles.gadgetsTitle;
-            if (joinDiscordHeading) joinDiscordHeading.textContent = fixedTitles.joinDiscordTitle;
-            if (snsHeading) snsHeading.textContent = fixedTitles.snsTitle;
-            if (contactHeading) contactHeading.textContent = fixedTitles.contactTitle;
-            const musicPlayerHeading = document.getElementById('music-player-heading');
-            if (musicPlayerHeading) {
-                musicPlayerHeading.textContent = "Songs I've Listened to Recently";
+            const titles = fixedTitles.en; // タイトルは常に英語
+            
+            if (!c || !titles) {
+                console.error(`Content or titles not found for language: ${currentLang}`);
+                return;
             }
 
+            // タイトルの更新（常に英語）
+            const titleUpdates = [
+                { element: mainName, value: siteOwnerName },
+                { element: profileHeading, value: titles.profileTitle },
+                { element: gadgetsHeading, value: titles.gadgetsTitle },
+                { element: joinDiscordHeading, value: titles.joinDiscordTitle },
+                { element: snsHeading, value: titles.snsTitle },
+                { element: contactHeading, value: titles.contactTitle },
+                { element: musicPlayerHeading, value: titles.musicPlayerTitle }
+            ];
+            
+            titleUpdates.forEach(({ element, value }) => {
+                if (element && value) element.textContent = value;
+            });
+
+            // コンテンツの更新
             if (profileText) profileText.textContent = c.profileContent;
-            if(profileImage) profileImage.alt = c.profileImageAlt;
-
-            renderGadgetList();
-
+            if (profileImage) profileImage.alt = c.profileImageAlt;
             if (contactEmailLabel) contactEmailLabel.textContent = c.contactEmailLabelText;
             if (contactDmLabel) contactDmLabel.textContent = c.contactDmLabelText;
-
             if (joinDiscordDescription) joinDiscordDescription.textContent = c.joinDiscordDescText;
             if (joinDiscordButton) joinDiscordButton.textContent = c.joinDiscordButtonText;
-
             if (languageButtonText) languageButtonText.textContent = c.languageButtonLabel;
-            if (langMenuJa) langMenuJa.textContent = c.langMenuItemJaText;
-            if (langMenuEn) langMenuEn.textContent = c.langMenuItemEnText;
             if (footerText) footerText.innerHTML = c.footer;
 
-            if (langMenuJa && langMenuEn) {
-                langMenuJa.classList.toggle('active', currentLang === 'ja');
-                langMenuEn.classList.toggle('active', currentLang === 'en');
-            }
+            // 言語メニュー項目の更新
+            const langMenuItems = [
+                { element: langMenuJa, lang: 'ja', text: c.langMenuItemJaText },
+                { element: langMenuEn, lang: 'en', text: c.langMenuItemEnText },
+                { element: langMenuZh, lang: 'zh', text: c.langMenuItemZhText }
+            ];
+            
+            langMenuItems.forEach(({ element, lang, text }) => {
+                if (element) {
+                    element.textContent = text;
+                    element.classList.toggle('active', currentLang === lang);
+                }
+            });
+
+            renderGadgetList();
             document.documentElement.lang = currentLang;
             lucide.createIcons();
         }
 
         function applyTheme() {
             const root = document.documentElement;
+            const themePrefix = isDarkMode ? 'dark' : 'light';
+            
+            body.classList.remove('light-theme', 'dark-theme');
+            body.classList.add(`${themePrefix}-theme`);
 
-            if (isDarkMode) {
-                body.classList.remove('light-theme');
-                body.classList.add('dark-theme');
-                root.style.setProperty('--current-bg', 'var(--color-bg-dark)');
-                root.style.setProperty('--current-text', 'var(--color-text-dark)');
-                root.style.setProperty('--current-accent-primary', 'var(--accent-primary-dark)');
-                root.style.setProperty('--current-text-variant', 'var(--text-variant-dark)');
-                root.style.setProperty('--current-outline', 'var(--outline-dark)');
-                root.style.setProperty('--current-surface-menu', 'var(--surface-menu-dark)');
-                root.style.setProperty('--current-card-bg', 'var(--card-background-dark)');
-                root.style.setProperty('--current-svg-fill', 'var(--svg-fill-dark)');
-                root.style.setProperty('--current-discord-svg-fill', 'var(--discord-svg-fill-dark)');
-                root.style.setProperty('--current-icon-wrapper-bg', 'var(--icon-wrapper-bg-dark)');
-                root.style.setProperty('--current-header-shadow', 'var(--header-shadow-dark)');
-                root.style.setProperty('--current-card-shadow', 'var(--card-shadow-dark)');
-                root.style.setProperty('--current-card-shadow-hover', 'var(--card-shadow-hover-dark)');
-                root.style.setProperty('--current-button-border-color', 'var(--button-outline-border-dark-final)');
-                root.style.setProperty('--current-button-text-color', 'var(--button-outline-text-dark)');
-                root.style.setProperty('--current-card-border-color', 'var(--card-border-dark)');
-                if (pageHeader) pageHeader.style.setProperty('background-color', 'var(--header-bg-dark-rgba)');
-                root.style.setProperty('--current-button-hover-bg-color', 'var(--button-hover-bg-dark)');
-                root.style.setProperty('--current-button-hover-text-color', 'var(--button-hover-text-dark)');
-                root.style.setProperty('--current-button-hover-border-color', 'var(--button-hover-border-dark)');
-            } else {
-                body.classList.remove('dark-theme');
-                body.classList.add('light-theme');
-                root.style.setProperty('--current-bg', 'var(--color-bg-light)');
-                root.style.setProperty('--current-text', 'var(--color-text-light)');
-                root.style.setProperty('--current-accent-primary', 'var(--accent-primary-light)');
-                root.style.setProperty('--current-text-variant', 'var(--text-variant-light)');
-                root.style.setProperty('--current-outline', 'var(--outline-light)');
-                root.style.setProperty('--current-surface-menu', 'var(--surface-menu-light)');
-                root.style.setProperty('--current-card-bg', 'var(--card-background-light)');
-                root.style.setProperty('--current-svg-fill', 'var(--svg-fill-light)');
-                root.style.setProperty('--current-discord-svg-fill', 'var(--discord-svg-fill-light)');
-                root.style.setProperty('--current-icon-wrapper-bg', 'var(--icon-wrapper-bg-light)');
-                root.style.setProperty('--current-header-shadow', 'var(--header-shadow-light)');
-                root.style.setProperty('--current-card-shadow', 'var(--card-shadow-light)');
-                root.style.setProperty('--current-card-shadow-hover', 'var(--card-shadow-hover-light)');
-                root.style.setProperty('--current-button-border-color', 'var(--button-outline-border-light)');
-                root.style.setProperty('--current-button-text-color', 'var(--button-outline-text-light)');
-                root.style.setProperty('--current-card-border-color', 'var(--card-border-light)');
-                if (pageHeader) pageHeader.style.setProperty('background-color', 'var(--header-bg-light-rgba)');
-                root.style.setProperty('--current-button-hover-bg-color', 'var(--button-hover-bg-light)');
-                root.style.setProperty('--current-button-hover-text-color', 'var(--button-hover-text-light)');
-                root.style.setProperty('--current-button-hover-border-color', 'var(--button-hover-border-light)');
+            const themeVars = {
+                '--current-bg': `var(--color-bg-${themePrefix})`,
+                '--current-text': `var(--color-text-${themePrefix})`,
+                '--current-accent-primary': `var(--accent-primary-${themePrefix})`,
+                '--current-text-variant': `var(--text-variant-${themePrefix})`,
+                '--current-outline': `var(--outline-${themePrefix})`,
+                '--current-surface-menu': `var(--surface-menu-${themePrefix})`,
+                '--current-card-bg': `var(--card-background-${themePrefix})`,
+                '--current-svg-fill': `var(--svg-fill-${themePrefix})`,
+                '--current-discord-svg-fill': `var(--discord-svg-fill-${themePrefix})`,
+                '--current-icon-wrapper-bg': `var(--icon-wrapper-bg-${themePrefix})`,
+                '--current-header-shadow': `var(--header-shadow-${themePrefix})`,
+                '--current-card-shadow': `var(--card-shadow-${themePrefix})`,
+                '--current-card-shadow-hover': `var(--card-shadow-hover-${themePrefix})`,
+                '--current-button-border-color': isDarkMode ? 'var(--button-outline-border-dark-final)' : 'var(--button-outline-border-light)',
+                '--current-button-text-color': `var(--button-outline-text-${themePrefix})`,
+                '--current-card-border-color': `var(--card-border-${themePrefix})`,
+                '--current-button-hover-bg-color': `var(--button-hover-bg-${themePrefix})`,
+                '--current-button-hover-text-color': `var(--button-hover-text-${themePrefix})`,
+                '--current-button-hover-border-color': `var(--button-hover-border-${themePrefix})`
+            };
+
+            Object.entries(themeVars).forEach(([prop, value]) => {
+                root.style.setProperty(prop, value);
+            });
+
+            if (pageHeader) {
+                pageHeader.style.setProperty('background-color', `var(--header-bg-${themePrefix}-rgba)`);
             }
         }
 
@@ -589,6 +719,10 @@
              if (languageMenu) languageMenu.classList.toggle('menu-visible');
         }
         function setLanguage(lang) {
+            if (!['ja', 'en', 'zh'].includes(lang)) {
+                console.error(`Invalid language code: ${lang}`);
+                return;
+            }
             currentLang = lang;
             localStorage.setItem('language', currentLang);
             updateTextContent();
@@ -596,31 +730,109 @@
         }
 
         function setupCustomCursor() {
-            if (customCursor) {
-                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                if (isTouchDevice) {
-                    customCursor.style.display = 'none';
-                    body.style.cursor = 'auto';
-                    return;
-                }
+            if (!customCursor) return;
+            
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            if (isTouchDevice) {
+                customCursor.style.display = 'none';
+                body.style.cursor = 'auto';
+                return;
+            }
 
-                document.addEventListener('mousemove', (e) => {
-                    customCursor.style.left = e.clientX + 'px';
-                    customCursor.style.top = e.clientY + 'px';
+            let rafId = null;
+            let mergedElement = null;
+            
+            const updateCursor = (e) => {
+                if (rafId) cancelAnimationFrame(rafId);
+                rafId = requestAnimationFrame(() => {
+                    customCursor.style.left = `${e.clientX}px`;
+                    customCursor.style.top = `${e.clientY}px`;
+                    
+                    // ボタンと一体化するエフェクト
+                    if (mergedElement) {
+                        const rect = mergedElement.getBoundingClientRect();
+                        const cursorX = e.clientX;
+                        const cursorY = e.clientY;
+                        
+                        // カーソルがボタンの境界内にあるかチェック
+                        const isInside = cursorX >= rect.left && cursorX <= rect.right &&
+                                        cursorY >= rect.top && cursorY <= rect.bottom;
+                        
+                        if (isInside) {
+                            // ボタンの形状に合わせてカーソルを変形
+                            const buttonWidth = rect.width;
+                            const buttonHeight = rect.height;
+                            const buttonBorderRadius = window.getComputedStyle(mergedElement).borderRadius || '9999px';
+                            
+                            // カーソルをボタンのサイズに合わせて拡大（少し小さめにしてコンテンツを隠さない）
+                            const targetWidth = Math.min(buttonWidth, 200); // 最大200px
+                            const targetHeight = Math.min(buttonHeight, 200);
+                            
+                            // ボタンの中心にカーソルを配置
+                            const buttonCenterX = rect.left + rect.width / 2;
+                            const buttonCenterY = rect.top + rect.height / 2;
+                            
+                            customCursor.style.width = `${targetWidth}px`;
+                            customCursor.style.height = `${targetHeight}px`;
+                            customCursor.style.borderRadius = buttonBorderRadius;
+                            customCursor.style.left = `${buttonCenterX}px`;
+                            customCursor.style.top = `${buttonCenterY}px`;
+                            customCursor.style.transform = `translate(-50%, -50%)`;
+                            customCursor.classList.add('merged');
+                        } else {
+                            // ボタンの外側では通常のカーソルに戻す
+                            customCursor.style.width = '';
+                            customCursor.style.height = '';
+                            customCursor.style.borderRadius = '';
+                            customCursor.style.left = `${e.clientX}px`;
+                            customCursor.style.top = `${e.clientY}px`;
+                            customCursor.classList.remove('merged');
+                        }
+                    }
                 });
-                document.addEventListener('mousedown', () => customCursor.classList.add('clicked'));
-                document.addEventListener('mouseup', () => customCursor.classList.remove('clicked'));
+            };
 
-                const interactiveQuery = 'a, button, input[type="button"], input[type="submit"], .sns-icon-link, #theme-toggle, #language-menu-button, .language-menu-item, .header-button-base, .outline-button';
-                document.querySelectorAll(interactiveQuery).forEach(el => {
-                    el.addEventListener('mouseenter', () => customCursor.classList.add('hovered'));
-                    el.addEventListener('mouseleave', () => customCursor.classList.remove('hovered'));
-                });
+            document.addEventListener('mousemove', updateCursor, { passive: true });
+            document.addEventListener('mousedown', () => customCursor.classList.add('clicked'), { passive: true });
+            document.addEventListener('mouseup', () => customCursor.classList.remove('clicked'), { passive: true });
 
-                if (spotifyPlayer) {
-                    spotifyPlayer.addEventListener('mouseenter', () => customCursor.style.opacity = '0');
-                    spotifyPlayer.addEventListener('mouseleave', () => customCursor.style.opacity = '1');
+            const interactiveQuery = 'a, button, input[type="button"], input[type="submit"], .sns-icon-link, #theme-toggle, #language-menu-button, .header-button-base, .outline-button';
+            const interactiveElements = document.querySelectorAll(interactiveQuery);
+            
+            // 言語メニュー項目は一体化エフェクトの対象外
+            const languageMenuItems = document.querySelectorAll('.language-menu-item');
+            
+            const handleMouseEnter = (e) => {
+                customCursor.classList.add('hovered');
+                // 言語メニュー項目でない場合のみ一体化エフェクトを適用
+                if (!e.currentTarget.classList.contains('language-menu-item')) {
+                    mergedElement = e.currentTarget;
                 }
+            };
+            
+            const handleMouseLeave = () => {
+                customCursor.classList.remove('hovered');
+                customCursor.classList.remove('merged');
+                customCursor.style.width = '';
+                customCursor.style.height = '';
+                customCursor.style.borderRadius = '';
+                mergedElement = null;
+            };
+            
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', handleMouseEnter, { passive: true });
+                el.addEventListener('mouseleave', handleMouseLeave, { passive: true });
+            });
+            
+            // 言語メニュー項目には通常のホバーエフェクトのみ適用
+            languageMenuItems.forEach(el => {
+                el.addEventListener('mouseenter', () => customCursor.classList.add('hovered'), { passive: true });
+                el.addEventListener('mouseleave', () => customCursor.classList.remove('hovered'), { passive: true });
+            });
+
+            if (spotifyPlayer) {
+                spotifyPlayer.addEventListener('mouseenter', () => customCursor.style.opacity = '0', { passive: true });
+                spotifyPlayer.addEventListener('mouseleave', () => customCursor.style.opacity = '1', { passive: true });
             }
         }
 
@@ -628,35 +840,59 @@
             const animatedElements = document.querySelectorAll('.animate-on-scroll');
             if (!animatedElements.length) return;
             const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) entry.target.classList.add('visible');
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        // リクエストアニメーションフレームを使用してより滑らかに
+                        requestAnimationFrame(() => {
+                            setTimeout(() => {
+                                entry.target.classList.add('visible');
+                            }, index * 100);
+                        });
+                        observer.unobserve(entry.target);
+                    }
                 });
-            }, { rootMargin: '0px', threshold: 0.1 });
+            }, { 
+                rootMargin: '0px', 
+                threshold: 0.1,
+                root: null
+            });
             animatedElements.forEach(el => observer.observe(el));
         }
 
+        let scrollTimeout = null;
         function handleHeaderShadow() {
-            if (pageHeader) {
+            if (!pageHeader) return;
+            
+            if (scrollTimeout) cancelAnimationFrame(scrollTimeout);
+            scrollTimeout = requestAnimationFrame(() => {
                 pageHeader.classList.toggle('header-scrolled', window.scrollY > 10);
-            }
+            });
         }
 
         function setupEmailCopy() {
-            if (copyEmailButton && emailTextSpan) {
-                copyEmailButton.addEventListener('click', () => {
-                    const email = emailTextSpan.textContent;
-                    navigator.clipboard.writeText(email).then(() => {
-                        const originalText = emailTextSpan.textContent;
-                        const copyIconSVG = copyEmailButton.querySelector('svg[data-lucide="copy"]').outerHTML;
-                        copyEmailButton.innerHTML = 'Copied! <svg data-lucide="check" class="copy-icon"></svg>';
+            if (!copyEmailButton || !emailTextSpan) return;
+            
+            const copyIcon = copyEmailButton.querySelector('svg[data-lucide="copy"]');
+            if (!copyIcon) return;
+            
+            const originalHTML = copyEmailButton.innerHTML;
+            const originalText = emailTextSpan.textContent;
+            
+            copyEmailButton.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(originalText);
+                    const copyIconSVG = copyIcon.outerHTML;
+                    copyEmailButton.innerHTML = 'Copied! <svg data-lucide="check" class="copy-icon"></svg>';
+                    lucide.createIcons();
+                    
+                    setTimeout(() => {
+                        copyEmailButton.innerHTML = originalHTML;
                         lucide.createIcons();
-                        setTimeout(() => {
-                            copyEmailButton.innerHTML = `<span id="email-text">${originalText}</span> ${copyIconSVG}`;
-                            lucide.createIcons();
-                        }, 2000);
-                    }).catch(err => console.error('Failed to copy email: ', err));
-                });
-            }
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy email:', err);
+                }
+            });
         }
 
         function initialize() {
@@ -686,12 +922,20 @@
                     toggleLanguageMenu();
                 });
             }
-            if (langMenuJa) {
-                langMenuJa.addEventListener('click', (e) => { e.preventDefault(); setLanguage('ja'); });
-            }
-            if (langMenuEn) {
-                langMenuEn.addEventListener('click', (e) => { e.preventDefault(); setLanguage('en'); });
-            }
+            const langMenuItems = [
+                { element: langMenuJa, lang: 'ja' },
+                { element: langMenuEn, lang: 'en' },
+                { element: langMenuZh, lang: 'zh' }
+            ];
+            
+            langMenuItems.forEach(({ element, lang }) => {
+                if (element) {
+                    element.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        setLanguage(lang);
+                    });
+                }
+            });
 
             document.addEventListener('click', (event) => {
                 if (languageMenu && languageMenu.classList.contains('menu-visible') &&
@@ -701,7 +945,7 @@
                 }
             });
 
-            window.addEventListener('scroll', handleHeaderShadow);
+            window.addEventListener('scroll', handleHeaderShadow, { passive: true });
         }
 
         document.addEventListener('DOMContentLoaded', initialize);
